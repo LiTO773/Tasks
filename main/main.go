@@ -6,13 +6,10 @@ import (
 )
 
 func main() {
-	PORT := "127.0.0.1:8080" // localhost:8080
-	log.Print("O servidor está ativo em: " + PORT)
-
 	// URLs
 	http.HandleFunc("/", CompleteTaskFunc)
 
-	log.Fatal(http.ListenAndServe(PORT, nil))
+	log.Fatal(http.ListenAndServe(":8080", nil)) // O servidor está ativo em: localhost:8080
 }
 
 func CompleteTaskFunc(w http.ResponseWriter, r *http.Request) { // "/"
