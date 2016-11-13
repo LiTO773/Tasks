@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Relativo a tarefas específicas
-	// http.HandleFunc("/terminar/", TerminarTarefa)
+	http.HandleFunc("/status/", AlterarStatusTarefa)
 	// http.HandleFunc("/eliminar/", EliminarTarefa)
 	// http.HandleFunc("/editar/", EditarTarefa)
 	// http.HandleFunc("/restaurar/", RestaurarTarefa)
@@ -43,13 +43,23 @@ func main() {
 // MostrarTarefas Mostrar todas tarefas pendentes do utilizador ("/")
 func MostrarTarefas(w http.ResponseWriter, r *http.Request) {
 	message := "Todas as tarefas pendentes (" + r.Method + ")" //r.Method == "GET" || r.Method == "POST"
+	tarefas := db.ObterTarefas(1)
+	fmt.Println(tarefas)
 	w.Write([]byte(message))
 }
 
 // MostrarUtilizador Mostrar informação do utilizador
 func MostrarUtilizador(w http.ResponseWriter, r *http.Request) {
-	message := "Todas as tarefas pendentes (" + r.Method + ")" //r.Method == "GET" || r.Method == "POST"
+	message := "Todas as tarefas pendentes (" + r.Method + ")"
 	utilizador := db.ObterUtilizador()
 	fmt.Println(utilizador)
+	w.Write([]byte(message))
+}
+
+// AlterarStatusTarefa Altera o status da tarefa com base no indicado pelo utilizador
+func AlterarStatusTarefa(w http.ResponseWriter, r *http.Request) {
+	message := "Todas as tarefas pendentes (" + r.Method + ")"
+	err := db.MudarStatusTarefa(1, 0, 3) // Teste (funciona)
+	fmt.Println(err)
 	w.Write([]byte(message))
 }
