@@ -1,6 +1,7 @@
 package modulos
 
 import (
+	"fmt"
 	"time"
 
 	mgo "gopkg.in/mgo.v2"
@@ -17,8 +18,8 @@ type Utilizador struct {
 	Email    string        `bson:"email"`
 }
 
-// Tarefas Estrutura para a coleção "tarefas"
-type Tarefas struct {
+// Tarefa Estrutura para a coleção "tarefas"
+type Tarefa struct {
 	ID                bson.ObjectId `bson:"_id,omitempty"`
 	id                int           `bson:"id"`
 	Titulo            string        `bson:"titulo"`
@@ -75,12 +76,12 @@ func ObterUtilizador() []Utilizador {
 }
 
 // ObterTarefas Obtem todas as tarefas na coleção "tarefas" e retorna-os
-func ObterTarefas(utilizadorID int) []Tarefas {
+func ObterTarefas(utilizadorID int) []Tarefa {
 	session, c := obterColecao("tarefas")
 
 	defer session.Close() // Defer
 
-	var results []Tarefas // Slice que guarda variáveis do tipo Tarefas
+	var results []Tarefa // Slice que guarda variáveis do tipo Tarefas
 
 	err := c.Find(bson.M{"utilizador": utilizadorID}).Sort("-timestamp").All(&results)
 	if err != nil { // Controlo de erros
@@ -109,6 +110,45 @@ func MudarStatusTarefa(utilizadorID int, tarefaID int, status int) bool {
 	}
 
 	return true
+}
+
+// ReciclarTarefa Manda a tarefa para a lixeira ou elimina permanentemente a tarefa se ela já estiver lá
+// string: Nome da tarefa; string: reciclada || eliminada; bool: Ocorreu erro
+func ReciclarTarefa(utilizadorID int, tarefaID int) (string, string, bool) {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	tarefaEspecificaObj := Tarefa{}
+	tarefaEspecificaBSON := bson.M{"utilizador": utilizadorID, "id": tarefaID}
+
+	// Procura a tarefa específica
+	err := c.Find(tarefaEspecificaBSON).One(&tarefaEspecificaObj)
+	if err != nil {
+		return "", "erro", false
+	}
+
+	// Elimina permanentemente caso já esteja na reciclagem
+	// 2 equivale sempre a DELETED, ou seja, a tarefa já está na lixeira
+	if tarefaEspecificaObj.Status == 2 {
+		err = c.Remove(tarefaEspecificaBSON)
+		// Se ocorrer algum erro
+		if err != nil {
+			return tarefaEspecificaObj.Titulo, "eliminar", true
+		}
+		// Se tudo correr bem
+		return tarefaEspecificaObj.Titulo, "eliminada", false
+	}
+
+	// Move para a reciclagem
+	// 2 equivale sempre a DELETED, ou seja, a tarefa vai para a lixeira
+	err = c.Update(tarefaEspecificaBSON, bson.M{"$set": bson.M{"status": 2}})
+
+	if err != nil {
+		fmt.Println(err)
+		return tarefaEspecificaObj.Titulo, "reciclar", true
+	}
+	return tarefaEspecificaObj.Titulo, "reciclada", false
 }
 
 ////// Mudar dados (Update) [FIM]
