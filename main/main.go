@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"fmt"
 
@@ -14,7 +15,7 @@ func main() {
 	// Relativo a tarefas específicas
 	http.HandleFunc("/status/", AlterarStatusTarefa)
 	http.HandleFunc("/eliminar/", EliminarTarefa)
-	// http.HandleFunc("/editar/", EditarTarefa)
+	http.HandleFunc("/editar/", EditarTarefa)
 	// http.HandleFunc("/restaurar/", RestaurarTarefa)
 	// http.HandleFunc("/criar/", CriarTarefa)
 	// http.HandleFunc("/atualizar/", AtualizarTarefa)
@@ -68,29 +69,42 @@ func AlterarStatusTarefa(w http.ResponseWriter, r *http.Request) {
 // EliminarTarefa Elimina a tarefa ou move-a para a reciclagem
 func EliminarTarefa(w http.ResponseWriter, r *http.Request) {
 	nome, destino, erro := db.ReciclarTarefa(1, 1)
+
 	var message string
-	if erro { // Caso haja um erro
+	if erro { // Houve um erro
 		message = "Ocorreu um erro a " + destino + " a tarefa " + strings.ToUpper(nome) + ". Tente novamente mais tarde"
 	} else if destino == "erro" { // A tarefa não foi encontrada
 		message = "A tarefa não existe!"
-	} else { // A operação ocorreu como esperado
+	} else { // A operação correu como esperado
 		message = "A Tarefa " + strings.ToUpper(nome) + " foi " + destino + " com sucesso!"
 	}
+
 	w.Write([]byte(message))
 }
 
-// {
-//     "_id" : ObjectId("58190caee55240d7ac1cf139"),
-//     "id" : 1,
-//     "titulo" : "gofmtall",
-//     "conteudo" : "The idea is to run go fmt -w file.go on every go file in the listing, *Edit turns out this difficult to do in golang **Edit brely 3 line bash script. ",
-//     "data_de_criacao" : ISODate("2015-11-12T16:58:31.000Z"),
-//     "ultima_modificacao" : ISODate("2015-11-14T10:42:14.000Z"),
-//     "data_de_fim" : ISODate("2015-11-13T13:16:48.000Z"),
-//     "prioridade" : 3,
-//     "categoria" : 1,
-//     "status" : 1,
-//     "expira_em" : null,
-//     "utilizador" : 1,
-//     "invisivel" : 0
-// }
+// EditarTarefa Permite editar o conteúdo de uma tarefa com base nos parametros recebidos
+//TODO: nil nas datas passa a ser 1, Janeiro, 1970
+func EditarTarefa(w http.ResponseWriter, r *http.Request) {
+	tarefaModelo := db.Tarefa{}
+	tarefaModelo.Id = 0
+	tarefaModelo.Titulo = "Tarefa Alterada"
+	tarefaModelo.Conteudo = "Esta tarefa foi alterada pelo utilizador"
+	tarefaModelo.DataDeFim = time.Now()
+	tarefaModelo.Prioridade = 2
+	tarefaModelo.Categoria = 2
+	tarefaModelo.ExpiraEm = time.Unix(0, 0) // Isto significa nil, que será depois interpretado pela função
+	tarefaModelo.Utilizador = 1
+	tarefaModelo.Invisivel = 0
+
+	resultado := db.EditarTarefa(tarefaModelo)
+
+	var message string
+
+	if !resultado {
+		message = "Ocorreu um erro a editar " + tarefaModelo.Titulo
+	} else {
+		message = "A tarefa " + tarefaModelo.Titulo + " foi editada com sucesso!"
+	}
+
+	w.Write([]byte(message))
+}

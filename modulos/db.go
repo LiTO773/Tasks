@@ -21,7 +21,7 @@ type Utilizador struct {
 // Tarefa Estrutura para a coleção "tarefas"
 type Tarefa struct {
 	ID                bson.ObjectId `bson:"_id,omitempty"`
-	id                int           `bson:"id"`
+	Id                int           `bson:"id"`
 	Titulo            string        `bson:"titulo"`
 	Conteudo          string        `bson:"conteudo"`
 	DataDeCriacao     time.Time     `bson:"data_de_criacao"`
@@ -149,6 +149,34 @@ func ReciclarTarefa(utilizadorID int, tarefaID int) (string, string, bool) {
 		return tarefaEspecificaObj.Titulo, "reciclar", true
 	}
 	return tarefaEspecificaObj.Titulo, "reciclada", false
+}
+
+// EditarTarefa Altera partes de uma determinada tarefa
+func EditarTarefa(tarefaEditada Tarefa) bool {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	tarefaEditadaBSON := bson.M{
+		"$set": bson.M{
+			"id":                 tarefaEditada.Id,
+			"titulo":             tarefaEditada.Titulo,
+			"conteudo":           tarefaEditada.Conteudo,
+			"ultima_modificacao": time.Now(),
+			"data_de_fim":        tarefaEditada.DataDeFim,
+			"prioridade":         tarefaEditada.Prioridade,
+			"categoria":          tarefaEditada.Categoria,
+			"status":             tarefaEditada.Status,
+			"expira_em":          tarefaEditada.ExpiraEm,
+			"invisivel":          tarefaEditada.Invisivel}}
+
+	err := c.Update(bson.M{"id": tarefaEditada.Id, "utilizador": tarefaEditada.Utilizador}, tarefaEditadaBSON)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
 }
 
 ////// Mudar dados (Update) [FIM]
