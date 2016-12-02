@@ -20,8 +20,8 @@ type Utilizador struct {
 
 // Tarefa Estrutura para a coleção "tarefas"
 type Tarefa struct {
-	ID                bson.ObjectId `bson:"_id,omitempty"`
-	Id                int           `bson:"id"`
+	mongoID           bson.ObjectId `bson:"_id,omitempty"`
+	ID                int           `bson:"id"`
 	Titulo            string        `bson:"titulo"`
 	Conteudo          string        `bson:"conteudo"`
 	DataDeCriacao     time.Time     `bson:"data_de_criacao"`
@@ -30,7 +30,7 @@ type Tarefa struct {
 	Prioridade        int           `bson:"prioridade"`
 	Categoria         int           `bson:"categoria"`
 	Status            int           `bson:"status"`
-	ExpiraEm          time.Time     `bson:"expira_em"`
+	ExpiraEm          time.Time     `bson:"expira_em"` // 0(UNIX) == Não expira
 	Utilizador        int           `bson:"utilizador"`
 	Invisivel         int           `bson:"invisivel"`
 }
@@ -159,7 +159,7 @@ func EditarTarefa(tarefaEditada Tarefa) bool {
 
 	tarefaEditadaBSON := bson.M{
 		"$set": bson.M{
-			"id":                 tarefaEditada.Id,
+			"id":                 tarefaEditada.ID,
 			"titulo":             tarefaEditada.Titulo,
 			"conteudo":           tarefaEditada.Conteudo,
 			"ultima_modificacao": time.Now(),
@@ -170,7 +170,7 @@ func EditarTarefa(tarefaEditada Tarefa) bool {
 			"expira_em":          tarefaEditada.ExpiraEm,
 			"invisivel":          tarefaEditada.Invisivel}}
 
-	err := c.Update(bson.M{"id": tarefaEditada.Id, "utilizador": tarefaEditada.Utilizador}, tarefaEditadaBSON)
+	err := c.Update(bson.M{"id": tarefaEditada.ID, "utilizador": tarefaEditada.Utilizador}, tarefaEditadaBSON)
 
 	if err != nil {
 		fmt.Println(err)

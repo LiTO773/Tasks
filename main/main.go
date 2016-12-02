@@ -86,7 +86,7 @@ func EliminarTarefa(w http.ResponseWriter, r *http.Request) {
 //TODO: nil nas datas passa a ser 1, Janeiro, 1970
 func EditarTarefa(w http.ResponseWriter, r *http.Request) {
 	tarefaModelo := db.Tarefa{}
-	tarefaModelo.Id = 0
+	tarefaModelo.ID = 0
 	tarefaModelo.Titulo = "Tarefa Alterada"
 	tarefaModelo.Conteudo = "Esta tarefa foi alterada pelo utilizador"
 	tarefaModelo.DataDeFim = time.Now()
