@@ -30,6 +30,7 @@ type Tarefa struct {
 	Prioridade        int           `bson:"prioridade"`
 	Categoria         int           `bson:"categoria"`
 	Status            int           `bson:"status"`
+	Reciclada         bool          `bson:"reciclada"`
 	ExpiraEm          time.Time     `bson:"expira_em"` // 0(UNIX) == Não expira
 	Utilizador        int           `bson:"utilizador"`
 	Invisivel         int           `bson:"invisivel"`
@@ -129,8 +130,7 @@ func ReciclarTarefa(utilizadorID int, tarefaID int) (string, string, bool) {
 	}
 
 	// Elimina permanentemente caso já esteja na reciclagem
-	// 2 equivale sempre a DELETED, ou seja, a tarefa já está na lixeira
-	if tarefaEspecificaObj.Status == 2 {
+	if tarefaEspecificaObj.Reciclada {
 		err = c.Remove(tarefaEspecificaBSON)
 		// Se ocorrer algum erro
 		if err != nil {
@@ -141,8 +141,7 @@ func ReciclarTarefa(utilizadorID int, tarefaID int) (string, string, bool) {
 	}
 
 	// Move para a reciclagem
-	// 2 equivale sempre a DELETED, ou seja, a tarefa vai para a lixeira
-	err = c.Update(tarefaEspecificaBSON, bson.M{"$set": bson.M{"status": 2}})
+	err = c.Update(tarefaEspecificaBSON, bson.M{"$set": bson.M{"reciclada": true}})
 
 	if err != nil {
 		fmt.Println(err)
@@ -172,6 +171,21 @@ func EditarTarefa(tarefaEditada Tarefa) bool {
 
 	err := c.Update(bson.M{"id": tarefaEditada.ID, "utilizador": tarefaEditada.Utilizador}, tarefaEditadaBSON)
 
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+// RestaurarTarefa Remove a tarefa da reciclagem
+func RestaurarTarefa(idTarefa int) bool {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	// Retira da reciclagem
+	err := c.Update(bson.M{"id": idTarefa}, bson.M{"$set": bson.M{"reciclada": false}})
 	if err != nil {
 		fmt.Println(err)
 		return false

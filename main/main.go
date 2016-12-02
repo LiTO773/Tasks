@@ -16,7 +16,7 @@ func main() {
 	http.HandleFunc("/status/", AlterarStatusTarefa)
 	http.HandleFunc("/eliminar/", EliminarTarefa)
 	http.HandleFunc("/editar/", EditarTarefa)
-	// http.HandleFunc("/restaurar/", RestaurarTarefa)
+	http.HandleFunc("/restaurar/", RestaurarTarefa)
 	// http.HandleFunc("/criar/", CriarTarefa)
 	// http.HandleFunc("/atualizar/", AtualizarTarefa)
 	// http.HandleFunc("/procurar/", ProcurarTarefa)
@@ -82,8 +82,7 @@ func EliminarTarefa(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(message))
 }
 
-// EditarTarefa Permite editar o conteúdo de uma tarefa com base nos parametros recebidos
-//TODO: nil nas datas passa a ser 1, Janeiro, 1970
+// EditarTarefa Edita o conteúdo de uma tarefa com base nos parametros recebidos
 func EditarTarefa(w http.ResponseWriter, r *http.Request) {
 	tarefaModelo := db.Tarefa{}
 	tarefaModelo.ID = 0
@@ -92,7 +91,8 @@ func EditarTarefa(w http.ResponseWriter, r *http.Request) {
 	tarefaModelo.DataDeFim = time.Now()
 	tarefaModelo.Prioridade = 2
 	tarefaModelo.Categoria = 2
-	tarefaModelo.ExpiraEm = time.Unix(0, 0) // Isto significa nil, que será depois interpretado pela função
+	tarefaModelo.Status = 1
+	tarefaModelo.ExpiraEm = time.Unix(0, 0) // Mesmo que nil
 	tarefaModelo.Utilizador = 1
 	tarefaModelo.Invisivel = 0
 
@@ -104,6 +104,21 @@ func EditarTarefa(w http.ResponseWriter, r *http.Request) {
 		message = "Ocorreu um erro a editar " + tarefaModelo.Titulo
 	} else {
 		message = "A tarefa " + tarefaModelo.Titulo + " foi editada com sucesso!"
+	}
+
+	w.Write([]byte(message))
+}
+
+// RestaurarTarefa Remove a tarefa da lixeira e reverte para o seu status anterior
+func RestaurarTarefa(w http.ResponseWriter, r *http.Request) {
+	resultado := db.RestaurarTarefa(0)
+
+	var message string
+
+	if !resultado {
+		message = "Ocorreu um erro a tirar " + "<nome da tarefa>" + " da reciclagem"
+	} else {
+		message = "A tarefa " + "<nome da tarefa>" + " foi removida da reciclagem com sucesso!"
 	}
 
 	w.Write([]byte(message))
