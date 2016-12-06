@@ -194,3 +194,45 @@ func RestaurarTarefa(idTarefa int) bool {
 }
 
 ////// Mudar dados (Update) [FIM]
+
+////// Inserir dados (Insert) [INICIO]
+
+// CriarTarefa Cria uma nova tarefa com base nos dados fornecidos pelo utilizador
+func CriarTarefa(novaTarefa Tarefa) bool {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	var resultado []Tarefa
+	err := c.Find(bson.M{}).All(&resultado)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	tarefaEditadaBSON := bson.M{
+		"id":                 len(resultado),
+		"titulo":             novaTarefa.Titulo,
+		"conteudo":           novaTarefa.Conteudo,
+		"data_de_criacao":    time.Now(),
+		"ultima_modificacao": time.Now(),
+		"data_de_fim":        novaTarefa.DataDeFim,
+		"prioridade":         novaTarefa.Prioridade,
+		"categoria":          novaTarefa.Categoria,
+		"status":             novaTarefa.Status,
+		"reciclada":          false,
+		"expira_em":          novaTarefa.ExpiraEm,
+		"utilizador":         novaTarefa.Utilizador,
+		"invisivel":          novaTarefa.Invisivel}
+
+	err = c.Insert(tarefaEditadaBSON)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+////// Inserir dados (Insert) [FIM]

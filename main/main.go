@@ -17,7 +17,7 @@ func main() {
 	http.HandleFunc("/eliminar/", EliminarTarefa)
 	http.HandleFunc("/editar/", EditarTarefa)
 	http.HandleFunc("/restaurar/", RestaurarTarefa)
-	// http.HandleFunc("/criar/", CriarTarefa)
+	http.HandleFunc("/criar/", CriarTarefa)
 	// http.HandleFunc("/atualizar/", AtualizarTarefa)
 	// http.HandleFunc("/procurar/", ProcurarTarefa)
 
@@ -101,9 +101,9 @@ func EditarTarefa(w http.ResponseWriter, r *http.Request) {
 	var message string
 
 	if !resultado {
-		message = "Ocorreu um erro a editar " + tarefaModelo.Titulo
+		message = "Ocorreu um erro a editar " + strings.ToUpper(tarefaModelo.Titulo)
 	} else {
-		message = "A tarefa " + tarefaModelo.Titulo + " foi editada com sucesso!"
+		message = "A tarefa " + strings.ToUpper(tarefaModelo.Titulo) + " foi editada com sucesso!"
 	}
 
 	w.Write([]byte(message))
@@ -119,6 +119,32 @@ func RestaurarTarefa(w http.ResponseWriter, r *http.Request) {
 		message = "Ocorreu um erro a tirar " + "<nome da tarefa>" + " da reciclagem"
 	} else {
 		message = "A tarefa " + "<nome da tarefa>" + " foi removida da reciclagem com sucesso!"
+	}
+
+	w.Write([]byte(message))
+}
+
+// CriarTarefa Cria uma nova tarefa
+func CriarTarefa(w http.ResponseWriter, r *http.Request) {
+	tarefaModelo := db.Tarefa{}
+	tarefaModelo.Titulo = "Nova Tarefa"
+	tarefaModelo.Conteudo = "Esta tarefa foi criada pelo utilizador"
+	tarefaModelo.DataDeFim = time.Now()
+	tarefaModelo.Prioridade = 2
+	tarefaModelo.Categoria = 2
+	tarefaModelo.Status = 1
+	tarefaModelo.ExpiraEm = time.Unix(0, 0) // Mesmo que nil
+	tarefaModelo.Utilizador = 1
+	tarefaModelo.Invisivel = 0
+
+	resultado := db.CriarTarefa(tarefaModelo)
+
+	var message string
+
+	if !resultado {
+		message = "Não foi possível criar a tarefa " + strings.ToUpper(tarefaModelo.Titulo)
+	} else {
+		message = "A tarefa " + strings.ToUpper(tarefaModelo.Titulo) + " foi criada com sucesso!"
 	}
 
 	w.Write([]byte(message))
