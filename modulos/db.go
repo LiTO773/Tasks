@@ -38,8 +38,6 @@ type Tarefa struct {
 
 ////// Estruturas [FIM]
 
-////// Funções de apoio [INICIO]
-
 // obterColecao Retorna a sessão e a coleção com base na string dada
 func obterColecao(nomeDaColecao string) (mgo.Session, mgo.Collection) {
 	session, err := mgo.Dial("127.0.0.1") // Conecta-se à base de dados pelo IP
@@ -52,10 +50,6 @@ func obterColecao(nomeDaColecao string) (mgo.Session, mgo.Collection) {
 
 	return *session, *c
 }
-
-////// Funções de apoio [FIM]
-
-////// Obter dados [INICIO]
 
 // ObterUtilizador Obtem todos os utilizadores na coleção "utilizadores" e retorna-os
 func ObterUtilizador() []Utilizador {
@@ -91,10 +85,6 @@ func ObterTarefas(utilizadorID int) []Tarefa {
 
 	return results
 }
-
-////// Obter dados [FIM]
-
-////// Mudar dados (Update) [INICIO]
 
 // MudarStatusTarefa Altera o estado de uma tarefa pelo definido pelo utilizador
 func MudarStatusTarefa(utilizadorID int, tarefaID int, status int) bool {
@@ -193,10 +183,6 @@ func RestaurarTarefa(idTarefa int) bool {
 	return true
 }
 
-////// Mudar dados (Update) [FIM]
-
-////// Inserir dados (Insert) [INICIO]
-
 // CriarTarefa Cria uma nova tarefa com base nos dados fornecidos pelo utilizador
 func CriarTarefa(novaTarefa Tarefa) bool {
 	session, c := obterColecao("tarefas")
@@ -235,4 +221,18 @@ func CriarTarefa(novaTarefa Tarefa) bool {
 	return true
 }
 
-////// Inserir dados (Insert) [FIM]
+// ProcurarTarefa Procura tarefa com base no título
+func ProcurarTarefa(titulo string) []Tarefa {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	var resultados []Tarefa
+	// RegEx utilizado para tornar a pesquisa non case sensitive
+	err := c.Find(bson.M{"titulo": &bson.RegEx{Pattern: titulo, Options: "i"}}).Sort("-timestamp").All(&resultados)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return resultados
+}

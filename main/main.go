@@ -18,8 +18,7 @@ func main() {
 	http.HandleFunc("/editar/", EditarTarefa)
 	http.HandleFunc("/restaurar/", RestaurarTarefa)
 	http.HandleFunc("/criar/", CriarTarefa)
-	// http.HandleFunc("/atualizar/", AtualizarTarefa)
-	// http.HandleFunc("/procurar/", ProcurarTarefa)
+	http.HandleFunc("/procurar/", ProcurarTarefa)
 
 	// // Relativo a todas as tarefas
 	http.HandleFunc("/", MostrarUtilizador)
@@ -148,4 +147,13 @@ func CriarTarefa(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(message))
+}
+
+// ProcurarTarefa Procura um tarefa pelo título
+func ProcurarTarefa(w http.ResponseWriter, r *http.Request) {
+	resultados := db.ProcurarTarefa("Github")
+
+	fmt.Println(resultados)
+
+	w.Write([]byte("Ver consola"))
 }
