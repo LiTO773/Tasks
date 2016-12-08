@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	// TODO: Ao executar alguma das funções ver se alguma tarefa expirou ou terminou
 	// Relativo a tarefas específicas
 	http.HandleFunc("/status/", AlterarStatusTarefa)
 	http.HandleFunc("/eliminar/", EliminarTarefa)
@@ -22,9 +23,8 @@ func main() {
 
 	// // Relativo a todas as tarefas
 	http.HandleFunc("/", MostrarUtilizador)
-	// http.HandleFunc("/eliminado/", TarefasEliminadas)
-	// http.HandleFunc("/reciclagem/", TarefasRecicladas)
-	// http.HandleFunc("/terminado/", TarefasTerminadas)
+	http.HandleFunc("/reciclagem/", TarefasRecicladas)
+	http.HandleFunc("/terminado/", TarefasTerminadas)
 
 	// // Relativo ao utilizador
 	// http.HandleFunc("/entrar", Login)
@@ -155,5 +155,23 @@ func ProcurarTarefa(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(resultados)
 
-	w.Write([]byte("Ver consola"))
+	w.Write([]byte("Ver consola (ProcurarTarefa)"))
+}
+
+// TarefasRecicladas Retorna todas as tarefas na reciclagem
+func TarefasRecicladas(w http.ResponseWriter, r *http.Request) {
+	resultados := db.ProcurarBool("reciclada")
+
+	fmt.Println(resultados)
+
+	w.Write([]byte("Ver consola (TarefasRecicladas)"))
+}
+
+// TarefasTerminadas Retorna todas as tarefas que foram completadas
+func TarefasTerminadas(w http.ResponseWriter, r *http.Request) {
+	resultados := db.ProcurarBool("terminada")
+
+	fmt.Println(resultados)
+
+	w.Write([]byte("Ver consola (TarefasTerminadas)"))
 }

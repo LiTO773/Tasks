@@ -31,6 +31,7 @@ type Tarefa struct {
 	Categoria         int           `bson:"categoria"`
 	Status            int           `bson:"status"`
 	Reciclada         bool          `bson:"reciclada"`
+	Terminada         bool          `bson:"terminada"`
 	ExpiraEm          time.Time     `bson:"expira_em"` // 0(UNIX) == Não expira
 	Utilizador        int           `bson:"utilizador"`
 	Invisivel         int           `bson:"invisivel"`
@@ -221,7 +222,7 @@ func CriarTarefa(novaTarefa Tarefa) bool {
 	return true
 }
 
-// ProcurarTarefa Procura tarefa com base no título
+// ProcurarTarefa Procura tarefas com base no título
 func ProcurarTarefa(titulo string) []Tarefa {
 	session, c := obterColecao("tarefas")
 
@@ -230,6 +231,22 @@ func ProcurarTarefa(titulo string) []Tarefa {
 	var resultados []Tarefa
 	// RegEx utilizado para tornar a pesquisa non case sensitive
 	err := c.Find(bson.M{"titulo": &bson.RegEx{Pattern: titulo, Options: "i"}}).Sort("-timestamp").All(&resultados)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return resultados
+}
+
+// ProcurarBool Procura tarefas cujo parametro especifico (reciclada/terminada) seja um booleano
+func ProcurarBool(prop string) []Tarefa {
+	session, c := obterColecao("tarefas")
+
+	defer session.Close()
+
+	var resultados []Tarefa
+	// RegEx utilizado para tornar a pesquisa non case sensitive
+	err := c.Find(bson.M{prop: true}).Sort("-timestamp").All(&resultados)
 
 	if err != nil {
 		fmt.Println(err)
