@@ -27,7 +27,7 @@ func main() {
 	http.HandleFunc("/terminado/", TarefasTerminadas)
 
 	// // Relativo ao utilizador
-	// http.HandleFunc("/entrar", Login)
+	http.HandleFunc("/entrar/", Login)
 	// http.HandleFunc("/registar", Signin)
 	// http.HandleFunc("/admin", Administracao)
 	// http.HandleFunc("/adicionar_utilizador", AdicionarUtilizador)
@@ -174,4 +174,16 @@ func TarefasTerminadas(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(resultados)
 
 	w.Write([]byte("Ver consola (TarefasTerminadas)"))
+}
+
+// Login Permite ao utilizador entrar na aplicação
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" { // GET => Página de login
+		w.Write([]byte("Página de Login"))
+	} else {
+		r.ParseForm()
+		fmt.Println(r.Form)
+		fmt.Println("Utilizador:", r.Form["utilizador"])
+		fmt.Println("Password:", r.Form["password"])
+	}
 }
